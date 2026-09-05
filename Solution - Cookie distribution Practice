@@ -1,0 +1,49 @@
+import sys
+
+def maxContentChildren(g, s):
+    g.sort()
+    s.sort()
+
+    child = 0
+    cookie = 0
+    count = 0
+
+    while child < len(g) and cookie < len(s):
+        if s[cookie] >= g[child]:
+            count += 1
+            child += 1
+        # Always move to the next cookie regardless of alignment
+        cookie += 1
+
+    return count
+
+def solve():
+    # Fast I/O: reads all whitespace-separated tokens at once
+    input_data = sys.stdin.read().split()
+    if not input_data:
+        return
+        
+    iterator = iter(input_data)
+    
+    # Read total number of test cases
+    t = int(next(iterator))
+    
+    out = []
+    for _ in range(t):
+        n = int(next(iterator))
+        m = int(next(iterator))
+        
+        # Safely parse greed factors for n children
+        g = [int(next(iterator)) for _ in range(n)]
+        
+        # Safely parse cookie sizes for m cookies (works perfectly even if m = 0)
+        s = [int(next(iterator)) for _ in range(m)]
+        
+        result = maxContentChildren(g, s)
+        out.append(str(result))
+        
+    # Flush all output lines efficiently
+    sys.stdout.write('\n'.join(out) + '\n')
+
+if __name__ == '__main__':
+    solve()
