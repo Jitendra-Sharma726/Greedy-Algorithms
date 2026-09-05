@@ -1,0 +1,43 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+// Function to solve the problem of forming maximum pairs for the dance competition
+void findMaximumPairs() {
+    string students;
+    cin >> students;  // Read the string representing the students
+    int totalStudents = students.size();  // Get the total number of students
+    vector<int> dp(totalStudents);  // Dynamic programming array to store maximum pairs
+    
+    dp[0] = 0;  // Initialize the first student
+
+    for (int i = 1; i < totalStudents; i++) {
+        // If both students are the same (both 'x' or both 'y'), no new pair can be formed
+        if (students[i] == students[i - 1]) {
+            dp[i] = dp[i - 1];
+        } else {
+            // If the current student and the previous one are different, we can form a pair
+            // The maximum pairs will be either the same as the previous student or the pairs formed by pairing these two students
+            dp[i] = max(dp[i - 1], (i >= 2 ? dp[i - 2] + 1 : 1));
+        }
+    }
+
+    // Output the maximum number of pairs that can be formed
+    cout << dp[totalStudents - 1] << endl;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);  // Fast input/output
+    cin.tie(nullptr);  // Tie cin and cout
+    cout.tie(nullptr);
+
+    int testCases;  // Variable to store the number of test cases
+    cin >> testCases;  // Read the number of test cases
+    while (testCases--) {
+        findMaximumPairs();  // Solve for each test case
+    }
+    return 0;  // Indicate successful execution
+}
