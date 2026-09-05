@@ -1,0 +1,230 @@
+# Watson Asks: Does Permutation Exist?
+
+## Problem Statement
+
+You are given an array `A` containing `N` integers.
+
+You can **rearrange** the elements of the array in any order.
+
+Determine whether it is possible to rearrange the array so that the difference between every pair of adjacent elements is at most `1`.
+
+Formally, for the rearranged array `B`:
+
+```text
+|B[i] - B[i + 1]| ≤ 1
+```
+
+for every adjacent pair.
+
+If such a rearrangement exists, print `YES`; otherwise, print `NO`.
+
+---
+
+## Input Format
+
+The first line contains an integer `T`, the number of test cases.
+
+For each test case:
+
+* The first line contains an integer `N`.
+* The second line contains `N` integers representing the array.
+
+---
+
+## Output Format
+
+For each test case, print:
+
+```text
+YES
+```
+
+if the array can be rearranged as required.
+
+Otherwise, print:
+
+```text
+NO
+```
+
+---
+
+## Constraints
+
+* `1 ≤ T ≤ 100`
+* `1 ≤ N ≤ 10⁵`
+* `1 ≤ A[i] ≤ 10⁹`
+* The sum of `N` over all test cases is at most `2 × 10⁵`
+
+---
+
+## Example
+
+### Input
+
+```text
+2
+4
+3 2 2 3
+2
+1 5
+```
+
+### Output
+
+```text
+YES
+NO
+```
+
+---
+
+## Explanation
+
+### Test Case 1
+
+```text
+A = [3, 2, 2, 3]
+```
+
+The array can remain as it is:
+
+```text
+3 2 2 3
+```
+
+Adjacent differences are:
+
+```text
+|3 - 2| = 1
+|2 - 2| = 0
+|2 - 3| = 1
+```
+
+All differences are at most `1`.
+
+Therefore:
+
+```text
+YES
+```
+
+### Test Case 2
+
+```text
+A = [1, 5]
+```
+
+The only possible arrangement is:
+
+```text
+1 5
+```
+
+or:
+
+```text
+5 1
+```
+
+The difference is `4`, which is greater than `1`.
+
+Therefore:
+
+```text
+NO
+```
+
+---
+
+## Approach
+
+The key observation is that numbers differing by more than `1` can never be adjacent.
+
+If the array contains a gap between two consecutive **distinct values** greater than `1`, no valid arrangement is possible.
+
+For example:
+
+```text
+[1, 2, 2, 3]
+```
+
+works because the values form a continuous range:
+
+```text
+1 → 2 → 3
+```
+
+But:
+
+```text
+[1, 2, 5]
+```
+
+does not work because there is a gap:
+
+```text
+2 → 5
+```
+
+with difference `3`.
+
+### Algorithm
+
+1. Sort the array.
+2. Check every pair of adjacent elements.
+3. If any difference is greater than `1`, return `NO`.
+4. Otherwise, return `YES`.
+
+---
+
+## Python Solution
+
+```python
+def canRearrange(arr):
+    arr.sort()
+
+    for i in range(1, len(arr)):
+        if arr[i] - arr[i - 1] > 1:
+            return "NO"
+
+    return "YES"
+
+
+T = int(input())
+
+for _ in range(T):
+    n = int(input())
+    arr = list(map(int, input().split()))
+
+    print(canRearrange(arr))
+```
+
+---
+
+## Complexity
+
+Sorting takes:
+
+```text
+O(N log N)
+```
+
+Checking adjacent elements takes:
+
+```text
+O(N)
+```
+
+Overall:
+
+* **Time:** `O(N log N)`
+* **Space:** `O(1)` extra space apart from the sorting implementation.
+
+---
+
+## Key Idea
+
+> Sort the array and check the difference between every pair of neighboring values.
+
+If any gap is greater than `1`, a valid permutation is impossible. Otherwise, the sorted array itself satisfies the required condition.
