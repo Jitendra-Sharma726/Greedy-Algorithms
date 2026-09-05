@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+    int T;
+    cin >> T;
+    assert(T >= 1 && T <= 100);
+    while (T--) {
+        string s;
+        cin >> s;
+        for (int i = 0; i < s.size(); i++) {
+            assert(s[i] == 'm' || s[i] == 's');
+        }
+        vector < int > killed(s.size());
+        for (int i = 0; i < s.size(); i++) {
+            if (s[i] == 'm') {
+                if (i - 1 >= 0 && s[i - 1] == 's' && !killed[i - 1]) {
+                    killed[i - 1] = true;
+                    continue;
+                }
+                if (i + 1 < s.size() && s[i + 1] == 's') {
+                    killed[i + 1] = true;
+                }
+            }
+        }
+        int snakes = 0;
+        int mongooses = 0;
+        for (int i = 0; i < s.size(); i++) {
+            if (s[i] == 's' && !killed[i]) {
+                snakes++;
+            }
+            if (s[i] == 'm') {
+                mongooses++;
+            }
+        }
+        string ans = "tie";
+        if (snakes > mongooses) {
+            ans = "snakes";
+        } else if (mongooses > snakes) {
+            ans = "mongooses";
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}
