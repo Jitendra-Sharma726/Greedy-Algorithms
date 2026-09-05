@@ -1,0 +1,306 @@
+# Valid Parenthesis String
+
+## Problem Statement
+
+You are given a string containing only three types of characters:
+
+* `(` — opening parenthesis
+* `)` — closing parenthesis
+* `*` — wildcard
+
+The `*` character can be treated as:
+
+* `(`
+* `)`
+* An empty string
+
+Your task is to determine whether the string **can be made valid** by replacing every `*` appropriately.
+
+A valid parenthesis string must have every opening parenthesis matched with a closing parenthesis in the correct order.
+
+---
+
+## Examples
+
+```text
+"()"     → Valid
+"(*)"    → Valid
+"(*))"   → Valid
+"((*))"  → Valid
+```
+
+For example:
+
+```text
+(*)
+```
+
+can become:
+
+```text
+()
+```
+
+by treating `*` as an empty string.
+
+---
+
+## Input Format
+
+The first line contains an integer `T`, the number of test cases.
+
+For each test case, the next line contains a string consisting only of:
+
+```text
+(
+)
+*
+```
+
+---
+
+## Output Format
+
+For each test case, print:
+
+* `1` if the string can be made valid.
+* `0` otherwise.
+
+---
+
+## Constraints
+
+* `1 ≤ T ≤ 10⁵`
+* `1 ≤ |s| ≤ 100`
+* Each character is `(`, `)` or `*`
+
+---
+
+## Sample Input
+
+```text
+5
+()
+(*)
+(*))
+((*))
+((*)*)
+```
+
+## Sample Output
+
+```text
+1
+1
+1
+1
+1
+```
+
+---
+
+# Greedy Approach
+
+The challenge is deciding what each `*` should represent.
+
+Instead of trying every possibility, we maintain a **range of possible open parentheses**.
+
+We keep two values:
+
+* `low` — minimum possible number of unmatched `(`
+* `high` — maximum possible number of unmatched `(`
+
+### Processing Characters
+
+#### When we see `(`
+
+It must increase the number of open parentheses:
+
+```text
+low += 1
+high += 1
+```
+
+#### When we see `)`
+
+It closes an opening parenthesis:
+
+```text
+low -= 1
+high -= 1
+```
+
+#### When we see `*`
+
+It can be `(`, `)` or empty.
+
+Therefore:
+
+```text
+low -= 1
+high += 1
+```
+
+But `low` can never be negative because we can choose `*` as an empty string or `(` instead.
+
+So:
+
+```text
+low = max(low, 0)
+```
+
+---
+
+## Important Condition
+
+If:
+
+```text
+high < 0
+```
+
+at any point, there are too many closing parentheses.
+
+There is no way to make the string valid.
+
+So we return `false`.
+
+After processing the entire string:
+
+```text
+low == 0
+```
+
+means there is some valid way to interpret the `*` characters.
+
+---
+
+## Example
+
+Consider:
+
+```text
+(*))
+```
+
+Process each character:
+
+```text
+(  → low = 1, high = 1
+*  → low = 0, high = 2
+)  → low = 0, high = 1
+)  → low = 0, high = 0
+```
+
+Since:
+
+```text
+low == 0
+```
+
+the string is valid.
+
+One possible interpretation is:
+
+```text
+(())
+```
+
+where `*` is treated as `(`.
+
+---
+
+# Algorithm
+
+For each string:
+
+1. Set `low = 0` and `high = 0`.
+2. Traverse the string from left to right.
+3. For `(`:
+
+   * Increase `low` and `high`.
+4. For `)`:
+
+   * Decrease `low` and `high`.
+5. For `*`:
+
+   * Decrease `low`.
+   * Increase `high`.
+6. Set `low = max(low, 0)`.
+7. If `high < 0`, return `false`.
+8. After processing the whole string:
+
+   * Return `true` if `low == 0`.
+   * Otherwise return `false`.
+
+---
+
+# Python Solution
+
+```python
+def isValidParenthesisString(s):
+    low = 0
+    high = 0
+
+    for ch in s:
+        if ch == '(':
+            low += 1
+            high += 1
+
+        elif ch == ')':
+            low -= 1
+            high -= 1
+
+        else:  # '*'
+            low -= 1
+            high += 1
+
+        # We can never have fewer than 0 unmatched '('
+        low = max(low, 0)
+
+        # Too many ')' means the string cannot be valid
+        if high < 0:
+            return False
+
+    return low == 0
+
+
+# Input
+T = int(input())
+
+for _ in range(T):
+    s = input().strip()
+
+    if isValidParenthesisString(s):
+        print(1)
+    else:
+        print(0)
+```
+
+---
+
+# Complexity
+
+Let `N` be the length of the string.
+
+* **Time Complexity:** `O(N)`
+* **Space Complexity:** `O(1)`
+
+We scan the string only once and use two variables.
+
+---
+
+# Key Takeaway
+
+The main greedy idea is:
+
+> Instead of deciding exactly what each `*` represents, keep track of the **minimum and maximum possible number of unmatched opening parentheses**.
+
+```text
+low  → minimum possible balance
+high → maximum possible balance
+```
+
+If `high` ever becomes negative, the string is impossible to balance.
+
+At the end, if `low == 0`, the string **can be made valid**.
