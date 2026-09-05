@@ -1,0 +1,21 @@
+vector<vector<int>> mergeIntervals(vector<vector<int>>& intervalList) {
+    if (intervalList.empty()) return {};
+
+    // Sort intervals by start time
+    sort(intervalList.begin(), intervalList.end(), [](const vector<int>& a, const vector<int>& b) {
+        return a[0] < b[0];
+    });
+
+    vector<vector<int>> merged;
+    merged.push_back(intervalList[0]);
+
+    for (int i = 1; i < (int)intervalList.size(); i++) {
+        if (intervalList[i][0] <= merged.back()[1]) {
+            merged.back()[1] = max(merged.back()[1], intervalList[i][1]);
+        } else {
+            merged.push_back(intervalList[i]);
+        }
+    }
+
+    return merged;
+}
