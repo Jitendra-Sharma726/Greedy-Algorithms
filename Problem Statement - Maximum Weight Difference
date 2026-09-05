@@ -1,0 +1,254 @@
+# Maximum Weight Difference
+
+## Problem Statement
+
+Chef has `N` items, where the `i`-th item weighs `Wi` grams.
+
+Chef wants to give exactly `K` items to his son, while carrying the remaining items himself.
+
+The son wants the items to be divided into two groups:
+
+* One group contains exactly `K` items.
+* The other group contains the remaining `N - K` items.
+* Chef carries the **heavier group**.
+* His son carries the **lighter group**.
+
+Find the **maximum possible difference** between the weight carried by Chef and his son.
+
+---
+
+## Input Format
+
+The first line contains an integer `T`, the number of test cases.
+
+For each test case:
+
+```text
+N K
+```
+
+The next line contains `N` integers:
+
+```text
+W1 W2 ... WN
+```
+
+where `Wi` is the weight of the `i`-th item.
+
+---
+
+## Output Format
+
+For each test case, print the **maximum possible difference** between the weights carried by Chef and his son.
+
+The answer should be given in grams.
+
+---
+
+## Constraints
+
+* `1 ≤ T ≤ 100`
+* `1 ≤ K < N ≤ 100`
+* `1 ≤ Wi ≤ 100000`
+
+---
+
+## Example
+
+### Input
+
+```text
+2
+5 2
+8 4 5 2 10
+8 3
+1 1 1 1 1 1 1 1
+```
+
+### Output
+
+```text
+17
+2
+```
+
+---
+
+## Explanation
+
+### Test Case 1
+
+There are `5` items:
+
+```text
+8 4 5 2 10
+```
+
+Chef must give exactly `2` items to his son.
+
+To maximize the difference, give the **two lightest items**:
+
+```text
+Son:   2 + 4 = 6
+Chef:  8 + 5 + 10 = 23
+```
+
+Difference:
+
+```text
+23 - 6 = 17
+```
+
+Answer:
+
+```text
+17
+```
+
+---
+
+### Test Case 2
+
+There are `8` items, each weighing `1` gram.
+
+The son gets `3` items:
+
+```text
+Son:   3 grams
+Chef:  5 grams
+```
+
+Difference:
+
+```text
+5 - 3 = 2
+```
+
+Answer:
+
+```text
+2
+```
+
+---
+
+# Approach
+
+The key observation is that Chef wants the **maximum difference**.
+
+There are two possible situations:
+
+### Case 1: Son gets `K` items
+
+To make the difference as large as possible, give the son the **K lightest items**.
+
+```text
+Difference = Total Weight - 2 × (weight of K lightest items)
+```
+
+### Case 2: Chef gets `K` items
+
+Alternatively, the son gets `N - K` items.
+
+To maximize the difference, Chef should get the **K heaviest items**.
+
+```text
+Difference = 2 × (weight of K heaviest items) - Total Weight
+```
+
+Therefore, calculate both possibilities and take the maximum.
+
+---
+
+## Algorithm
+
+For each test case:
+
+1. Sort the array of weights.
+2. Calculate the total weight.
+3. Find the sum of the `K` smallest items.
+4. Find the sum of the `K` largest items.
+5. Calculate:
+
+   ```text
+   option1 = total - 2 × sum_of_K_smallest
+   option2 = 2 × sum_of_K_largest - total
+   ```
+6. Return:
+
+   ```text
+   max(option1, option2)
+   ```
+
+---
+
+## Python Solution
+
+```python
+def maximum_weight_difference(weights, k):
+    weights.sort()
+
+    total = sum(weights)
+
+    # Son gets K lightest items
+    smallest_k = sum(weights[:k])
+    option1 = total - 2 * smallest_k
+
+    # Chef gets K heaviest items
+    largest_k = sum(weights[-k:])
+    option2 = 2 * largest_k - total
+
+    return max(option1, option2)
+
+
+T = int(input())
+
+for _ in range(T):
+    N, K = map(int, input().split())
+    weights = list(map(int, input().split()))
+
+    print(maximum_weight_difference(weights, K))
+```
+
+---
+
+## Complexity
+
+Sorting takes:
+
+```text
+O(N log N)
+```
+
+Calculating the sums takes:
+
+```text
+O(N)
+```
+
+Overall:
+
+```text
+Time:  O(N log N)
+Space: O(1) extra
+```
+
+---
+
+## Key Idea
+
+> **The maximum difference can be achieved by giving the son either the `K` lightest items or the `N-K` lightest items.**
+
+Equivalently, compare:
+
+```text
+Total Weight - 2 × sum(K smallest)
+```
+
+and
+
+```text
+2 × sum(K largest) - Total Weight
+```
+
+and take the larger value.
