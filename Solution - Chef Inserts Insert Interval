@@ -1,0 +1,28 @@
+vector<vector<int>> insertInterval(const vector<vector<int>>& intervalList, const vector<int>& newIntervalValue) {
+    vector<vector<int>> result;
+    int n = intervalList.size();
+    int i = 0;
+    int start = newIntervalValue[0], end = newIntervalValue[1];
+
+    // 1) Add intervals ending before newInterval
+    while (i < n && intervalList[i][1] < start) {
+        result.push_back(intervalList[i]);
+        i++;
+    }
+
+    // 2) Merge overlapping intervals
+    while (i < n && intervalList[i][0] <= end) {
+        start = min(start, intervalList[i][0]);
+        end = max(end, intervalList[i][1]);
+        i++;
+    }
+    result.push_back({start, end});
+
+    // 3) Add remaining intervals
+    while (i < n) {
+        result.push_back(intervalList[i]);
+        i++;
+    }
+
+    return result;
+}
