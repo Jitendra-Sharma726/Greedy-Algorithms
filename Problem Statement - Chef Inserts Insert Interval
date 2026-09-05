@@ -1,0 +1,451 @@
+# Chef Inserts Insert Interval
+
+## Problem Statement
+
+You are given a list of **non-overlapping intervals** sorted by their start values.
+
+Each interval is represented as:
+
+```text
+[start, end]
+```
+
+You are also given a new interval that needs to be inserted into the list.
+
+After inserting the new interval:
+
+* The intervals must remain sorted by their start values.
+* Any overlapping intervals must be merged.
+* The final intervals must not overlap.
+
+Return the updated list of intervals.
+
+---
+
+## Example
+
+Suppose the intervals are:
+
+```text
+[1, 3]
+[6, 9]
+[12, 15]
+[18, 21]
+```
+
+and the new interval is:
+
+```text
+[5, 10]
+```
+
+The new interval overlaps with `[6, 9]`, so they are merged:
+
+```text
+[5, 10]
+```
+
+Final result:
+
+```text
+[1, 3]
+[5, 10]
+[12, 15]
+[18, 21]
+```
+
+---
+
+## Function Declaration
+
+```python
+insertInterval(intervalList, newIntervalValue)
+```
+
+### Parameters
+
+* `intervalList` — a sorted list of non-overlapping intervals.
+* `newIntervalValue` — the interval to insert.
+
+### Return Value
+
+Returns a list of sorted, non-overlapping intervals after inserting and merging the new interval.
+
+---
+
+## Input Format
+
+The first line contains an integer `T`, the number of test cases.
+
+For each test case:
+
+* The first line contains the number of existing intervals `N`.
+* The next `N` lines contain:
+
+  ```text
+  start end
+  ```
+* The final line contains the new interval:
+
+  ```text
+  newStart newEnd
+  ```
+
+---
+
+## Output Format
+
+For each test case, print the resulting intervals after insertion and merging.
+
+Each interval should be displayed as:
+
+```text
+[start end]
+```
+
+---
+
+## Constraints
+
+* `0 ≤ N ≤ 10^4`
+* Each interval contains exactly two integers.
+* `0 ≤ start ≤ end ≤ 10^5`
+* Existing intervals are sorted by start time.
+* Existing intervals do not overlap.
+* The new interval also satisfies:
+
+  ```text
+  0 ≤ start ≤ end ≤ 10^5
+  ```
+
+---
+
+# Examples
+
+## Example 1
+
+### Input
+
+```text
+1
+4
+1 3
+6 9
+12 15
+18 21
+5 10
+```
+
+### Output
+
+```text
+[1 3]
+[5 10]
+[12 15]
+[18 21]
+```
+
+### Explanation
+
+The new interval `[5, 10]` overlaps with `[6, 9]`.
+
+They are merged into:
+
+```text
+[5, 10]
+```
+
+The other intervals remain unchanged.
+
+---
+
+## Example 2
+
+### Input
+
+```text
+1
+3
+2 4
+7 9
+12 14
+3 8
+```
+
+### Output
+
+```text
+[2 9]
+[12 14]
+```
+
+### Explanation
+
+The new interval `[3, 8]` overlaps with both:
+
+```text
+[2, 4]
+[7, 9]
+```
+
+All three intervals are merged into:
+
+```text
+[2, 9]
+```
+
+---
+
+## Example 3
+
+### Input
+
+```text
+1
+5
+1 2
+3 5
+6 7
+8 10
+12 16
+17 19
+```
+
+### Output
+
+```text
+[1 2]
+[3 5]
+[6 7]
+[8 10]
+[12 16]
+[17 19]
+```
+
+### Explanation
+
+The new interval `[17, 19]` does not overlap with any existing interval, so it is simply added at the end.
+
+---
+
+## Example 4
+
+### Input
+
+```text
+1
+2
+1 5
+10 15
+6 9
+```
+
+### Output
+
+```text
+[1 5]
+[6 9]
+[10 15]
+```
+
+### Explanation
+
+The new interval `[6, 9]` fits between the existing intervals without overlapping either one.
+
+---
+
+## Example 5
+
+### Input
+
+```text
+1
+3
+1 2
+5 7
+8 10
+3 6
+```
+
+### Output
+
+```text
+[1 2]
+[3 7]
+[8 10]
+```
+
+### Explanation
+
+The new interval `[3, 6]` overlaps with `[5, 7]`.
+
+They are merged into:
+
+```text
+[3, 7]
+```
+
+---
+
+# Approach
+
+This problem can be solved using a **greedy interval insertion** technique.
+
+We process the existing intervals from left to right.
+
+There are three cases.
+
+### Case 1: Current interval comes before the new interval
+
+If:
+
+```text
+current_end < new_start
+```
+
+there is no overlap.
+
+Add the current interval to the result.
+
+---
+
+### Case 2: Current interval overlaps with the new interval
+
+If:
+
+```text
+current_start <= new_end
+```
+
+and:
+
+```text
+new_start <= current_end
+```
+
+the intervals overlap.
+
+Merge them by updating:
+
+```text
+new_start = min(new_start, current_start)
+new_end = max(new_end, current_end)
+```
+
+---
+
+### Case 3: Current interval comes after the new interval
+
+If:
+
+```text
+current_start > new_end
+```
+
+then the new interval can be added to the result.
+
+After that, add all remaining intervals unchanged.
+
+---
+
+# Algorithm
+
+1. Create an empty result list.
+2. Traverse all existing intervals.
+3. Add intervals that completely come before the new interval.
+4. Merge all intervals that overlap with the new interval.
+5. Add the merged new interval.
+6. Add all remaining intervals.
+7. Return the result.
+
+---
+
+## Python Solution
+
+```python
+def insertInterval(intervalList, newIntervalValue):
+    result = []
+
+    new_start, new_end = newIntervalValue
+    i = 0
+    n = len(intervalList)
+
+    # 1. Add intervals that come before the new interval
+    while i < n and intervalList[i][1] < new_start:
+        result.append(intervalList[i])
+        i += 1
+
+    # 2. Merge overlapping intervals
+    while i < n and intervalList[i][0] <= new_end:
+        new_start = min(new_start, intervalList[i][0])
+        new_end = max(new_end, intervalList[i][1])
+        i += 1
+
+    # Add the merged interval
+    result.append([new_start, new_end])
+
+    # 3. Add remaining intervals
+    while i < n:
+        result.append(intervalList[i])
+        i += 1
+
+    return result
+
+
+# Input
+T = int(input())
+
+for _ in range(T):
+    N = int(input())
+
+    intervals = []
+
+    for _ in range(N):
+        start, end = map(int, input().split())
+        intervals.append([start, end])
+
+    new_start, new_end = map(int, input().split())
+
+    result = insertInterval(
+        intervals,
+        [new_start, new_end]
+    )
+
+    for start, end in result:
+        print(f"[{start} {end}]")
+```
+
+---
+
+# Complexity
+
+Because the existing intervals are already sorted, we do **not** need to sort them again.
+
+We scan the intervals only once.
+
+```text
+Time:  O(N)
+Space: O(N)
+```
+
+`O(N)` space is used for the resulting list of intervals.
+
+---
+
+# Key Idea
+
+> **Since the intervals are already sorted and non-overlapping, scan them once, merge every interval that overlaps with the new interval, and keep all non-overlapping intervals unchanged.**
+
+The two most important conditions are:
+
+```text
+current_end < new_start
+```
+
+→ current interval comes before the new interval.
+
+```text
+current_start <= new_end
+```
+
+→ current interval overlaps with the new interval.
