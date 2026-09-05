@@ -1,0 +1,281 @@
+# Covering
+
+## Problem Statement
+
+You are given `N` integer intervals:
+
+```text
+[a, b]
+```
+
+where `a ≤ b`.
+
+An interval `[a, b]` contains all integers from `a` to `b`.
+
+For example:
+
+```text
+[3, 5] = {3, 4, 5}
+[3, 3] = {3}
+```
+
+An integer `x` **covers** an interval `[a, b]` if:
+
+```text
+a ≤ x ≤ b
+```
+
+You need to choose a set of integers `S` such that **every interval contains at least one chosen integer**.
+
+Your goal is to find the **minimum number of integers** required to cover all intervals.
+
+---
+
+## Example
+
+Consider:
+
+```text
+[6, 9]
+[3, 5]
+[4, 8]
+```
+
+We can choose:
+
+```text
+S = {4, 7}
+```
+
+* `4` covers `[3, 5]`
+* `4` covers `[4, 8]`
+* `7` covers `[6, 9]`
+
+Therefore, the minimum number of integers is:
+
+```text
+2
+```
+
+---
+
+## Input Format
+
+The first line contains an integer `N`, the number of intervals.
+
+The next `N` lines contain two integers:
+
+```text
+a b
+```
+
+representing the interval `[a, b]`.
+
+---
+
+## Output Format
+
+Print a single integer representing the **minimum number of integers needed to cover all intervals**.
+
+---
+
+## Constraints
+
+* `1 ≤ N ≤ 5000`
+* `1 ≤ a ≤ b ≤ 10⁸`
+
+---
+
+## Sample 1
+
+### Input
+
+```text
+2
+3 5
+3 3
+```
+
+### Output
+
+```text
+1
+```
+
+### Explanation
+
+Both intervals contain the integer `3`:
+
+```text
+[3, 5] → contains 3
+[3, 3] → contains 3
+```
+
+So we only need to choose:
+
+```text
+S = {3}
+```
+
+Answer:
+
+```text
+1
+```
+
+---
+
+## Sample 2
+
+### Input
+
+```text
+3
+6 9
+3 5
+4 8
+```
+
+### Output
+
+```text
+2
+```
+
+### Explanation
+
+Choose:
+
+```text
+S = {4, 7}
+```
+
+Then:
+
+```text
+[3, 5] → covered by 4
+[4, 8] → covered by 4
+[6, 9] → covered by 7
+```
+
+Therefore, only **2 integers** are required.
+
+---
+
+# Greedy Approach
+
+This is a classic **Greedy Algorithm** problem.
+
+The key observation is:
+
+> Always choose the **right endpoint** of the interval that ends earliest.
+
+### Steps
+
+1. Sort all intervals by their ending point.
+2. Keep track of the last integer we selected.
+3. Process intervals from left to right.
+4. If the current interval already contains the last selected integer, it is already covered.
+5. Otherwise, choose the current interval's **right endpoint**.
+6. Continue until all intervals are processed.
+
+### Why choose the right endpoint?
+
+Suppose the earliest-ending interval is:
+
+```text
+[3, 5]
+```
+
+Choosing `5` is better than choosing `3` because `5` has a greater chance of covering future intervals.
+
+For example:
+
+```text
+[3, 5]
+[4, 8]
+```
+
+If we choose `5`, both intervals are covered.
+
+```text
+5 ∈ [3, 5]
+5 ∈ [4, 8]
+```
+
+So one point is enough.
+
+---
+
+## Algorithm
+
+```text
+Sort intervals by their end value.
+
+count = 0
+last_point = -1
+
+For each interval [start, end]:
+
+    If last_point is not inside [start, end]:
+        Choose end as the new point
+        count++
+
+Return count
+```
+
+---
+
+## Python Solution
+
+```python
+def minimum_points(intervals):
+    # Sort intervals by their ending point
+    intervals.sort(key=lambda x: x[1])
+
+    count = 0
+    last_point = -1
+
+    for start, end in intervals:
+
+        # If the current interval is not covered
+        if last_point < start:
+            # Choose the right endpoint
+            last_point = end
+            count += 1
+
+    return count
+
+
+# Input
+n = int(input())
+
+intervals = []
+
+for _ in range(n):
+    start, end = map(int, input().split())
+    intervals.append((start, end))
+
+print(minimum_points(intervals))
+```
+
+---
+
+## Complexity
+
+Let `N` be the number of intervals.
+
+* Sorting: `O(N log N)`
+* Traversing intervals: `O(N)`
+* Total: **`O(N log N)`**
+* Extra space: **`O(N)`** for storing the intervals
+
+---
+
+## Key Takeaway
+
+The greedy rule is:
+
+> **Sort by ending point and always choose the right endpoint of the earliest-ending uncovered interval.**
+
+This choice covers the current interval while leaving the maximum possible room to cover future intervals.
