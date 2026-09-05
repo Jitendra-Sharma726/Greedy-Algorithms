@@ -1,0 +1,321 @@
+# Little Elephant and Music
+
+## Problem Statement
+
+You are given `N` songs.
+
+Each song has:
+
+* `B` — the band that performed the song
+* `L` — the length of the song in seconds
+
+The songs can be played in **any order**, but every song must be played exactly once.
+
+### Sweetness of a Song
+
+When a song is played, its sweetness is:
+
+```text
+sweetness = L × number of different bands heard so far
+```
+
+The current song's band is included in the count.
+
+Your task is to arrange the songs in an order that **maximizes the total sweetness**.
+
+---
+
+## Input Format
+
+The first line contains an integer `T`, the number of test cases.
+
+For each test case:
+
+* The first line contains an integer `N`, the number of songs.
+* The next `N` lines contain two integers:
+
+```text
+B L
+```
+
+where:
+
+* `B` = band ID
+* `L` = song length
+
+---
+
+## Output Format
+
+For each test case, print the **maximum possible total sweetness**.
+
+---
+
+## Constraints
+
+* `1 ≤ T ≤ 5`
+* `1 ≤ N ≤ 100000`
+* `1 ≤ B, L ≤ 10⁹`
+
+---
+
+## Example 1
+
+### Input
+
+```text
+2
+3
+1 2
+2 2
+3 2
+3
+2 3
+1 2
+2 4
+```
+
+### Output
+
+```text
+12
+16
+```
+
+---
+
+## Explanation
+
+### Test Case 1
+
+Songs:
+
+```text
+Band  Length
+1      2
+2      2
+3      2
+```
+
+Each song belongs to a different band.
+
+Playing them in any order gives:
+
+```text
+Song 1: 2 × 1 = 2
+Song 2: 2 × 2 = 4
+Song 3: 2 × 3 = 6
+```
+
+Total:
+
+```text
+2 + 4 + 6 = 12
+```
+
+Since all bands are different, the order does not matter.
+
+**Answer: `12`**
+
+---
+
+### Test Case 2
+
+Songs:
+
+```text
+Band  Length
+2      3
+1      2
+2      4
+```
+
+If we use the original order:
+
+```text
+2 × 1 = 2? 
+```
+
+More carefully:
+
+```text
+Song (2, 3): 3 × 1 = 3
+Song (1, 2): 2 × 2 = 4
+Song (2, 4): 4 × 2 = 8
+```
+
+Total:
+
+```text
+3 + 4 + 8 = 15
+```
+
+But a better order is:
+
+```text
+(1, 2)
+(2, 3)
+(2, 4)
+```
+
+Now:
+
+```text
+(1, 2): 2 × 1 = 2
+(2, 3): 3 × 2 = 6
+(2, 4): 4 × 2 = 8
+```
+
+Total:
+
+```text
+2 + 6 + 8 = 16
+```
+
+Therefore, the maximum sweetness is:
+
+```text
+16
+```
+
+---
+
+# Greedy Approach
+
+The important observation is that **only the first song of each new band increases the number of different bands**.
+
+Suppose a band has several songs.
+
+Once that band has been introduced, all its remaining songs get the same multiplier until another new band is introduced.
+
+Therefore:
+
+* For every band, choose its **longest song** to be played when that band is introduced.
+* All other songs from the same band can be played afterward.
+* Introduce bands in decreasing order of their longest song length.
+
+This maximizes the contribution of songs that receive a larger multiplier.
+
+---
+
+## Step-by-Step Algorithm
+
+For each test case:
+
+### 1. Group songs by band
+
+For every band, find its maximum song length.
+
+For example:
+
+```text
+Band 2 → lengths [3, 4]
+Band 1 → lengths [2]
+```
+
+Maximum lengths:
+
+```text
+Band 2 → 4
+Band 1 → 2
+```
+
+### 2. Sort the bands
+
+Sort bands by their maximum song length in **descending order**.
+
+```text
+4, 2
+```
+
+### 3. Calculate the contribution
+
+If there are `k` different bands, the first song of the first band gets multiplier `1`, the first song of the second band gets multiplier `2`, and so on.
+
+All remaining songs from an already introduced band get the current multiplier.
+
+A convenient way to implement this is to sort **all songs by length in descending order within each band structure**, then process each band's longest song as its introduction.
+
+---
+
+## Python Solution
+
+```python
+from collections import defaultdict
+
+
+def maximum_sweetness(songs):
+    # Group song lengths by band
+    bands = defaultdict(list)
+
+    for band, length in songs:
+        bands[band].append(length)
+
+    # Sort songs inside each band in descending order
+    for band in bands:
+        bands[band].sort(reverse=True)
+
+    # Sort bands by their longest song
+    band_list = list(bands.values())
+    band_list.sort(key=lambda x: x[0], reverse=True)
+
+    total = 0
+    different_bands = 0
+
+    # Process each band
+    for songs_of_band in band_list:
+        different_bands += 1
+
+        # First song introduces a new band
+        total += songs_of_band[0] * different_bands
+
+        # Remaining songs use the same number of bands
+        for length in songs_of_band[1:]:
+            total += length * different_bands
+
+    return total
+
+
+# Input
+T = int(input())
+
+for _ in range(T):
+    N = int(input())
+
+    songs = []
+
+    for _ in range(N):
+        band, length = map(int, input().split())
+        songs.append((band, length))
+
+    print(maximum_sweetness(songs))
+```
+
+---
+
+## Complexity
+
+Let `N` be the number of songs.
+
+* Grouping songs: `O(N)`
+* Sorting songs: `O(N log N)`
+* Processing songs: `O(N)`
+
+Overall:
+
+```text
+Time Complexity: O(N log N)
+Space Complexity: O(N)
+```
+
+---
+
+## Key Takeaway
+
+The key greedy idea is:
+
+> **Introduce bands in an order that gives the largest possible song lengths the largest possible multipliers.**
+
+For each band, its **longest song should be used when the band is introduced**.
+
+Then process the remaining songs from that band with the same multiplier.
