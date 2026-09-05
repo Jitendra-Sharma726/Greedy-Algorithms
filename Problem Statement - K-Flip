@@ -1,0 +1,346 @@
+# K-Flip
+
+## Problem Statement
+
+You are given a binary string `S` of length `N` and an integer `K`.
+
+You can perform the following operation at most once for each starting position:
+
+* Choose a substring of exactly `K` consecutive characters.
+* Flip every character in that substring:
+
+  * `0 → 1`
+  * `1 → 0`
+* The same starting position cannot be chosen more than once.
+
+Your goal is to find the **lexicographically smallest string** that can be obtained.
+
+### Lexicographical Order
+
+A string `A` is lexicographically smaller than string `B` if, at the first position where they differ:
+
+```text
+A[i] < B[i]
+```
+
+Since `0 < 1`, we should try to make the string contain `0`s as early as possible.
+
+---
+
+## Input Format
+
+The first line contains an integer `T`, the number of test cases.
+
+For each test case:
+
+```text
+N K
+S
+```
+
+Where:
+
+* `N` = length of the binary string.
+* `K` = length of the substring to flip.
+* `S` = binary string containing only `0` and `1`.
+
+---
+
+## Output Format
+
+For each test case, print the lexicographically smallest string that can be obtained.
+
+---
+
+## Constraints
+
+* `1 ≤ T ≤ 100`
+* `1 ≤ N ≤ 10^5`
+* `1 ≤ K ≤ N`
+* `S` contains only `0` and `1`
+* Sum of `N` over all test cases is at most `3 × 10^5`
+
+---
+
+## Examples
+
+### Example 1
+
+#### Input
+
+```text
+4
+3 2
+101
+4 2
+1011
+5 3
+01010
+5 2
+01010
+```
+
+#### Output
+
+```text
+000
+0001
+00011
+00000
+```
+
+---
+
+## Explanation
+
+### Test Case 1
+
+```text
+S = 101
+K = 2
+```
+
+We want the first character to be `0`.
+
+Flip positions `0..1`:
+
+```text
+101 → 010
+```
+
+Now the second character is `1`, so flip positions `1..2`:
+
+```text
+010 → 001
+```
+
+However, because each starting position can be used only once, the optimal sequence must be considered carefully. The final achievable minimum is:
+
+```text
+000
+```
+
+---
+
+# Greedy Approach
+
+The key observation is:
+
+> Process the string from left to right and fix each position as soon as possible.
+
+Suppose we are currently at position `i`.
+
+There are two cases:
+
+### Case 1: Current character is `0`
+
+We are already happy with it.
+
+Do nothing and move to the next position.
+
+### Case 2: Current character is `1`
+
+If `i + K <= N`, we can start a flip at position `i`.
+
+Flipping there changes the current `1` into `0`, which is always better lexicographically.
+
+Therefore:
+
+```text
+if current bit == 1:
+    flip substring [i, i + K - 1]
+```
+
+If we reach a position where fewer than `K` characters remain, we cannot start another flip.
+
+---
+
+# Efficient Implementation
+
+Actually flipping all `K` characters every time would take `O(NK)` time.
+
+Instead, we use a **difference array** to keep track of whether the current position is affected by an odd or even number of flips.
+
+We maintain:
+
+```text
+flip[i]
+```
+
+to indicate where the effect of a flip starts/ends.
+
+A variable `active_flip` stores the current flip parity.
+
+For every position:
+
+1. Add the flip effect ending at this position.
+2. Determine the current bit after all active flips.
+3. If it is `1` and we can still perform a `K`-length flip:
+
+   * Start a flip.
+   * Change the current parity.
+   * Mark where this flip will stop affecting future positions.
+4. Store the resulting bit.
+
+---
+
+## Algorithm
+
+For each test case:
+
+1. Create a difference array of size `N + 1`.
+2. Set `active_flip = 0`.
+3. Process positions from left to right.
+4. Update `active_flip` using the difference array.
+5. Calculate the current bit after applying active flips.
+6. If the bit is `1` and `i + K <= N`:
+
+   * Start a flip at `i`.
+   * Toggle `active_flip`.
+   * Mark `flip[i + K]` so the effect ends after `K` positions.
+7. Store the resulting bit.
+8. Print the resulting string.
+
+---
+
+## Python Solution
+
+```python
+def k_flip(n, k, s):
+    s = list(s)
+
+    # Difference array for tracking flip effects
+    flip = [0] * (n + 1)
+
+    active_flip = 0
+
+    for i in range(n):
+        # Remove the effect of flips that ended here
+        active_flip ^= flip[i]
+
+        # Current bit after applying active flips
+        current_bit = int(s[i]) ^ active_flip
+
+        # If current bit is 1, try to make it 0
+        if current_bit == 1 and i + k <= n:
+            # Start a flip at i
+            active_flip ^= 1
+
+            # Flip effect ends after k positions
+            flip[i + k] ^= 1
+
+            current_bit = 0
+
+        s[i] = str(current_bit)
+
+    return ''.join(s)
+
+
+# Input
+T = int(input())
+
+for _ in range(T):
+    n, k = map(int, input().split())
+    s = input().strip()
+
+    print(k_flip(n, k, s))
+```
+
+---
+
+## Dry Run
+
+Consider:
+
+```text
+N = 5
+K = 2
+S = 01010
+```
+
+Process from left to right.
+
+```text
+Position 0 → 0
+```
+
+Already `0`, so keep it.
+
+```text
+Position 1 → 1
+```
+
+Flip positions `1..2`.
+
+```text
+01010
+ ↓
+00110
+```
+
+Continue processing while tracking the flip effect efficiently.
+
+The greedy process eventually produces:
+
+```text
+00000
+```
+
+which is the lexicographically smallest possible result.
+
+---
+
+## Complexity
+
+Let `N` be the length of the string.
+
+### Time Complexity
+
+```text
+O(N)
+```
+
+Each position is processed exactly once.
+
+### Space Complexity
+
+```text
+O(N)
+```
+
+The difference array requires `O(N)` extra space.
+
+---
+
+## Why Greedy Works
+
+Lexicographical order means that **earlier positions are more important than later positions**.
+
+Therefore, when we see a `1` at position `i` and a `K`-length flip can start there, flipping it changes:
+
+```text
+1 → 0
+```
+
+This is always the best possible choice for the current position.
+
+Once position `i` is fixed, future operations cannot improve it without potentially changing an already-fixed earlier position. So we process from left to right and make the best possible decision at every position.
+
+---
+
+## Key Takeaway
+
+The main idea is:
+
+```text
+Process left → right
+        ↓
+If current bit is 1
+        ↓
+Can a K-length flip start here?
+        ↓
+Yes → Flip
+No  → Leave it
+```
+
+The **difference array + greedy strategy** reduces the solution from `O(NK)` to **O(N)**.
