@@ -1,0 +1,28 @@
+class Solution {
+public:
+    static const int MX = 1000;
+    static const long long INF = 1e18;
+    int a[MX][MX];
+    long long dp[MX][MX];
+
+    long long solve(int n, vector<vector<int>> &matrix) {
+        // Copy input into internal array and sort each row
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++)
+                a[i][j] = matrix[i][j];
+            sort(a[i], a[i] + n);
+        }
+
+        for (int i = 0; i < n; i++) dp[0][i] = a[0][i];
+
+        for (int i = 1; i < n; i++) {
+            for (int j = 0, k = -1; j < n; j++) {
+                while (k + 1 < n && a[i - 1][k + 1] < a[i][j]) k++;
+                if (k == -1) dp[i][j] = -INF;
+                else dp[i][j] = a[i][j] + dp[i - 1][k];
+            }
+        }
+
+        return max(dp[n - 1][n - 1], -1ll);
+    }
+};
