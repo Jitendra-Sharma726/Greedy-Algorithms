@@ -1,0 +1,319 @@
+# Chef Solves Meeting Rooms III
+
+## Problem Statement
+
+Chef has `n` meeting rooms numbered from `0` to `n - 1`.
+
+He is given a list of meetings. Each meeting has:
+
+* `start` — the original start time
+* `end` — the original end time
+
+All meetings have different start times.
+
+Chef follows these rules:
+
+1. A meeting is assigned to the **available room with the smallest room number**.
+2. If multiple rooms are available, always choose the room with the smallest number.
+3. If no room is available when a meeting starts, the meeting must **wait** until a room becomes free.
+4. When a meeting is delayed, its **duration remains unchanged**.
+5. If multiple meetings are waiting for rooms, the meeting with the **earlier original start time** gets priority.
+6. After scheduling all meetings, find the room that was used the most times.
+7. If multiple rooms have the same highest number of bookings, return the **smallest room number**.
+
+---
+
+## Function Declaration
+
+```python
+findMostBookedRoom(totalRooms, meetingSchedules)
+```
+
+### Parameters
+
+* `totalRooms` — number of meeting rooms.
+* `meetingSchedules` — list of meetings where each meeting is `[start, end]`.
+
+### Return Value
+
+Return the room number that was booked the most times.
+
+If multiple rooms have the same number of bookings, return the smallest room number.
+
+---
+
+## Input Format
+
+For each test case:
+
+* The first line contains `n`, the number of rooms.
+* The next `m` lines contain two integers `start` and `end`, representing a meeting.
+
+> Note: The original statement's input section omits the definition of `m`; it represents the number of meetings.
+
+---
+
+## Output Format
+
+For each test case, print the room number that was booked the most times.
+
+---
+
+## Constraints
+
+* `1 ≤ T ≤ 10`
+* `1 ≤ n ≤ 100`
+* `1 ≤ m ≤ 10^5`
+* `0 ≤ start < end ≤ 5 × 10^5`
+* All meeting start times are unique.
+
+---
+
+## Example 1
+
+### Input
+
+```text
+3
+[1, 20]
+[2, 10]
+[3, 5]
+[4, 9]
+[6, 8]
+```
+
+### Output
+
+```text
+1
+```
+
+### Explanation
+
+Meetings are processed according to their original start times.
+
+Whenever a room becomes available, the smallest numbered available room is selected. If all rooms are occupied, the meeting waits until the earliest room becomes free.
+
+After scheduling all meetings, room `1` has been used the most times.
+
+---
+
+## Example 2
+
+### Input
+
+```text
+5
+[1, 2]
+[2, 3]
+[3, 4]
+[4, 5]
+```
+
+### Output
+
+```text
+0
+```
+
+### Explanation
+
+The meetings do not overlap.
+
+Room `0` can handle all meetings:
+
+```text
+[1,2] → Room 0
+[2,3] → Room 0
+[3,4] → Room 0
+[4,5] → Room 0
+```
+
+Therefore, room `0` is used the most.
+
+---
+
+# Approach
+
+This problem can be solved efficiently using **two min-heaps**.
+
+### 1. Available Rooms Heap
+
+Store the room numbers that are currently free.
+
+The smallest room number should always be selected first.
+
+```text
+available_rooms
+```
+
+Since it is a min-heap, the smallest room number is at the top.
+
+---
+
+### 2. Busy Rooms Heap
+
+Store currently occupied rooms as:
+
+```text
+(end_time, room_number)
+```
+
+The heap first sorts by the earliest ending time.
+
+If two rooms become free at the same time, the smaller room number is preferred.
+
+```text
+busy_rooms
+```
+
+---
+
+## Algorithm
+
+1. Sort all meetings by their start time.
+2. Initially, all rooms are available.
+3. For each meeting:
+
+   * Free every room whose meeting has ended before or exactly at the current start time.
+   * If a room is available:
+
+     * Select the smallest room number.
+     * Schedule the meeting normally.
+   * Otherwise:
+
+     * Take the room whose meeting finishes earliest.
+     * Delay the current meeting until that room becomes free.
+     * Keep the original meeting duration.
+4. Increase the booking count of the selected room.
+5. After processing all meetings, return the room with the highest booking count.
+6. In case of a tie, return the smallest room number.
+
+---
+
+## Python Solution
+
+```python
+import heapq
+
+
+def findMostBookedRoom(totalRooms, meetingSchedules):
+    # Sort meetings by original start time
+    meetingSchedules.sort()
+
+    # Min-heap containing available room numbers
+    available_rooms = list(range(totalRooms))
+    heapq.heapify(available_rooms)
+
+    # Min-heap containing (end_time, room_number)
+    busy_rooms = []
+
+    # Number of times each room is used
+    bookings = [0] * totalRooms
+
+    for start, end in meetingSchedules:
+        duration = end - start
+
+        # Make all rooms free whose meetings have ended
+        while busy_rooms and busy_rooms[0][0] <= start:
+            finish_time, room = heapq.heappop(busy_rooms)
+            heapq.heappush(available_rooms, room)
+
+        # If a room is available
+        if available_rooms:
+            room = heapq.heappop(available_rooms)
+            new_end = end
+
+        # Otherwise, delay the meeting
+        else:
+            finish_time, room = heapq.heappop(busy_rooms)
+
+            new_start = finish_time
+            new_end = new_start + duration
+
+        # Book the selected room
+        bookings[room] += 1
+
+        # Add the room back to busy rooms
+        heapq.heappush(busy_rooms, (new_end, room))
+
+    # Find room with maximum bookings.
+    # max() with key=(-bookings, room) gives:
+    # 1. Highest booking count
+    # 2. Smallest room number in case of a tie
+    answer = min(
+        range(totalRooms),
+        key=lambda room: (-bookings[room], room)
+    )
+
+    return answer
+```
+
+---
+
+## Example Usage
+
+```python
+rooms = 2
+
+meetings = [
+    [0, 5],
+    [2, 7],
+    [4, 6]
+]
+
+print(findMostBookedRoom(rooms, meetings))
+```
+
+Output:
+
+```text
+0
+```
+
+---
+
+## Complexity
+
+Let `m` be the number of meetings and `n` be the number of rooms.
+
+### Time Complexity
+
+```text
+O(m log m + m log n)
+```
+
+* Sorting meetings: `O(m log m)`
+* Each meeting performs heap operations: `O(log n)`
+
+### Space Complexity
+
+```text
+O(m + n)
+```
+
+The meetings and the two heaps require additional memory.
+
+---
+
+## Key Takeaway
+
+The important idea is to maintain **two priority queues**:
+
+```text
+Available Rooms
+      ↓
+Smallest room number
+```
+
+and
+
+```text
+Busy Rooms
+      ↓
+Earliest finishing meeting
+```
+
+This allows us to efficiently simulate the scheduling rules while always choosing the correct room.
+
+> **Greedy Strategy:** At every meeting, choose the smallest available room. If no room is available, delay the meeting until the earliest room becomes free.
