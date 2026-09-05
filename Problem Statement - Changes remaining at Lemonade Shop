@@ -1,0 +1,236 @@
+# Changes Remaining at Lemonade Shop
+
+## Problem Statement
+
+A lemonade costs **$5**. Customers arrive one by one and pay using a `$5`, `$10`, or `$20` bill.
+
+The shop starts with **no money**.
+
+For each customer:
+
+* `$5` → No change is required.
+* `$10` → Give back one `$5` bill.
+* `$20` → Give back `$15`, using either:
+
+  * one `$10` + one `$5`, or
+  * three `$5` bills.
+
+The shop must serve customers **in the given order**.
+
+Determine whether the shop can provide the correct change to **every customer**.
+
+---
+
+## Function
+
+```text
+canProvideChange(customerBills, numberOfBills)
+```
+
+### Parameters
+
+* `customerBills` — Array containing the bills paid by customers.
+* `numberOfBills` — Number of customers.
+
+Each bill is one of:
+
+```text
+5, 10, 20
+```
+
+### Return Value
+
+Return:
+
+* `true` if the shop can serve every customer.
+* `false` if the shop cannot provide change at any point.
+
+---
+
+## Input Format
+
+The first line contains an integer `T`, the number of test cases.
+
+For each test case:
+
+* The first line contains `n`, the number of customers.
+* The second line contains `n` space-separated integers representing the bills.
+
+---
+
+## Output Format
+
+For each test case, print:
+
+```text
+1
+```
+
+if all customers can be served, otherwise print:
+
+```text
+0
+```
+
+---
+
+## Constraints
+
+* `1 ≤ T ≤ 10⁵`
+* `1 ≤ n ≤ 10⁵`
+* `customerBills[i] ∈ {5, 10, 20}`
+* The total number of customers across all test cases is at most `10⁵`.
+
+---
+
+## Example 1
+
+### Input
+
+```text
+3
+6
+5 5 10 5 20 20
+7
+5 5 5 10 10 20 20
+8
+5 5 5 5 10 10 20 20
+```
+
+### Output
+
+```text
+0
+0
+1
+```
+
+### Explanation
+
+#### Test Case 1
+
+```text
+5  → receive $5
+5  → receive $5
+10 → give $5
+5  → receive $5
+20 → give $10 + $5
+20 → need $10 + $5, but not enough change
+```
+
+Therefore:
+
+```text
+false
+```
+
+#### Test Case 3
+
+```text
+5  → receive $5
+5  → receive $5
+5  → receive $5
+5  → receive $5
+
+10 → give $5
+10 → give $5
+
+20 → give $10 + $5
+20 → give $10 + $5
+```
+
+Every customer receives the correct change.
+
+Therefore:
+
+```text
+true
+```
+
+---
+
+## Approach
+
+We only need to keep track of the number of `$5` and `$10` bills available.
+
+Let:
+
+```text
+five  = number of $5 bills
+ten   = number of $10 bills
+```
+
+For each customer:
+
+### Customer pays $5
+
+No change is required.
+
+```text
+five += 1
+```
+
+### Customer pays $10
+
+We need to give `$5`.
+
+```text
+if five == 0:
+    return false
+
+five -= 1
+ten += 1
+```
+
+### Customer pays $20
+
+We need to give `$15`.
+
+Prefer giving:
+
+```text
+$10 + $5
+```
+
+because `$5` bills are more useful for future `$10` customers.
+
+If that is not possible, give:
+
+```text
+$5 + $5 + $5
+```
+
+So:
+
+```text
+if ten > 0 and five > 0:
+    ten -= 1
+    five -= 1
+
+elif five >= 3:
+    five -= 3
+
+else:
+    return false
+```
+
+If all customers are served successfully, return `true`.
+
+---
+
+## Complexity
+
+For each customer, we perform only constant-time operations.
+
+* **Time:** `O(n)`
+* **Space:** `O(1)`
+
+---
+
+## Key Idea
+
+The important greedy rule is:
+
+> When a customer pays `$20`, use a `$10 + $5` combination whenever possible.
+
+This preserves `$5` bills, which are required to provide change when future customers pay with `$10`.
