@@ -1,0 +1,233 @@
+# Chopsticks
+
+## Problem Statement
+
+Chef has `N` chopsticks. The length of the `i`-th chopstick is `L[i]`.
+
+Two chopsticks can form a usable pair if the difference between their lengths is at most `D`.
+
+In other words:
+
+```text
+|L[i] - L[j]| ≤ D
+```
+
+Each chopstick can be used in **at most one pair**.
+
+Find the **maximum number of pairs** Chef can form.
+
+---
+
+## Input Format
+
+The first line contains two integers:
+
+```text
+N D
+```
+
+* `N` — number of chopsticks
+* `D` — maximum allowed difference in length
+
+The next `N` lines contain one integer each:
+
+```text
+L[i]
+```
+
+where `L[i]` is the length of the `i`-th chopstick.
+
+---
+
+## Output Format
+
+Print a single integer representing the **maximum number of valid pairs** Chef can form.
+
+---
+
+## Constraints
+
+* `1 ≤ N ≤ 100000`
+* `0 ≤ D ≤ 10^9`
+* `1 ≤ L[i] ≤ 10^9`
+
+---
+
+## Example
+
+### Input
+
+```text
+5 2
+1
+3
+3
+9
+4
+```
+
+### Output
+
+```text
+2
+```
+
+---
+
+## Explanation
+
+The chopstick lengths are:
+
+```text
+1 3 3 9 4
+```
+
+Sort them:
+
+```text
+1 3 3 4 9
+```
+
+With `D = 2`, two chopsticks can be paired if their difference is at most `2`.
+
+We can create:
+
+```text
+(1, 3) → difference = 2
+(3, 4) → difference = 1
+```
+
+The chopstick of length `9` cannot be paired with any remaining chopstick.
+
+Therefore, the maximum number of pairs is:
+
+```text
+2
+```
+
+---
+
+# Approach
+
+This problem can be solved using a **greedy algorithm**.
+
+### Step 1: Sort the chopsticks
+
+Sort all chopstick lengths in ascending order.
+
+### Step 2: Check adjacent chopsticks
+
+Start from the smallest chopstick.
+
+For two consecutive chopsticks:
+
+```text
+L[i] and L[i + 1]
+```
+
+If:
+
+```text
+L[i + 1] - L[i] ≤ D
+```
+
+we can pair them.
+
+After creating a pair, skip both chopsticks.
+
+Otherwise, the current chopstick cannot form a pair with the next one, so move to the next chopstick.
+
+### Why does this work?
+
+After sorting, the next chopstick is the closest possible candidate for the current chopstick.
+
+If the current chopstick can be paired with the next one, using this pair is optimal because it uses the smallest possible lengths and leaves larger chopsticks available for future pairs.
+
+---
+
+## Algorithm
+
+1. Sort the array of chopstick lengths.
+2. Set `i = 0` and `pairs = 0`.
+3. While `i < N - 1`:
+
+   * If `L[i + 1] - L[i] ≤ D`:
+
+     * Create a pair.
+     * Increment `pairs`.
+     * Move `i` by `2`.
+   * Otherwise:
+
+     * Move `i` by `1`.
+4. Return `pairs`.
+
+---
+
+## Python Solution
+
+```python
+def max_pairs(lengths, d):
+    lengths.sort()
+
+    pairs = 0
+    i = 0
+
+    while i < len(lengths) - 1:
+        if lengths[i + 1] - lengths[i] <= d:
+            pairs += 1
+            i += 2
+        else:
+            i += 1
+
+    return pairs
+
+
+# Input
+N, D = map(int, input().split())
+
+lengths = []
+
+for _ in range(N):
+    lengths.append(int(input()))
+
+print(max_pairs(lengths, D))
+```
+
+---
+
+## Complexity
+
+Sorting takes:
+
+```text
+O(N log N)
+```
+
+The greedy scan takes:
+
+```text
+O(N)
+```
+
+Therefore:
+
+```text
+Time:  O(N log N)
+Space: O(1) extra
+```
+
+---
+
+## Key Idea
+
+> **Sort the chopsticks and greedily pair adjacent chopsticks whenever their length difference is at most `D`.**
+
+```text
+if L[i + 1] - L[i] <= D:
+    make a pair
+    skip both
+else:
+    skip the current chopstick
+```
+
+This produces the maximum possible number of valid pairs.
