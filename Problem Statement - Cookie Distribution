@@ -1,0 +1,207 @@
+# Cookie Distribution
+
+## Problem Statement
+
+You have `n` children and `m` cookies.
+
+Each child has a **greed factor** `g[i]`, which represents the minimum cookie size required to make that child happy.
+
+Each cookie has a **size** `s[j]`.
+
+A child is content if:
+
+```text
+cookie size >= child's greed factor
+```
+
+Each child can receive **at most one cookie**, and each cookie can be given to **at most one child**.
+
+Find the **maximum number of content children**.
+
+---
+
+## Input Format
+
+The first line contains an integer `T`, the number of test cases.
+
+For each test case:
+
+* The first line contains two integers `n` and `m`:
+
+  * `n` = number of children
+  * `m` = number of cookies
+* The second line contains `n` integers representing the greed factors.
+* The third line contains `m` integers representing the cookie sizes.
+
+---
+
+## Output Format
+
+For each test case, print one integer representing the maximum number of children that can be made content.
+
+---
+
+## Constraints
+
+* `1 ≤ T ≤ 10`
+* `1 ≤ n ≤ 3 × 10⁴`
+* `0 ≤ m ≤ 3 × 10⁴`
+* `1 ≤ g[i], s[j] ≤ 2³¹ - 1`
+
+---
+
+## Example
+
+### Input
+
+```text id="m1j7wq"
+2
+4 3
+2 3 1 4
+1 3 2
+3 5
+1 2 2
+2 3 1 4 5
+```
+
+### Output
+
+```text id="1n4jzr"
+3
+3
+```
+
+---
+
+## Explanation
+
+### Test Case 1
+
+Children:
+
+```text id="c3h5gk"
+[2, 3, 1, 4]
+```
+
+Cookies:
+
+```text id="e3p7ly"
+[1, 3, 2]
+```
+
+Sort both arrays:
+
+```text id="2r5j8c"
+Children: [1, 2, 3, 4]
+Cookies:  [1, 2, 3]
+```
+
+We can match:
+
+```text id="p4b2zx"
+Child 1 → Cookie 1
+Child 2 → Cookie 2
+Child 3 → Cookie 3
+```
+
+The child with greed factor `4` cannot be satisfied.
+
+Answer:
+
+```text id="r4o5qz"
+3
+```
+
+### Test Case 2
+
+Children:
+
+```text id="7b0c4v"
+[1, 2, 2]
+```
+
+Cookies:
+
+```text id="d6k8pa"
+[1, 2, 3, 4, 5]
+```
+
+We can satisfy all three children.
+
+Answer:
+
+```text id="x5h1qn"
+3
+```
+
+---
+
+## Greedy Approach
+
+The best strategy is to:
+
+1. Sort the children by greed factor.
+2. Sort the cookies by size.
+3. Start with the smallest child and the smallest cookie.
+4. If the cookie can satisfy the child, assign it and move to the next child.
+5. If the cookie is too small, discard it and try the next cookie.
+6. Continue until all children or cookies have been processed.
+
+### Why does this work?
+
+We always use the **smallest cookie that can satisfy the current child**.
+
+This avoids wasting a large cookie on a child who could be satisfied with a smaller one, leaving larger cookies available for children with higher greed factors.
+
+---
+
+## Python Solution
+
+```python id="a8r3yx"
+def maxContentChildren(g, s):
+    g.sort()
+    s.sort()
+
+    child = 0
+    cookie = 0
+    count = 0
+
+    while child < len(g) and cookie < len(s):
+
+        if s[cookie] >= g[child]:
+            count += 1
+            child += 1
+            cookie += 1
+        else:
+            cookie += 1
+
+    return count
+
+
+T = int(input())
+
+for _ in range(T):
+    n, m = map(int, input().split())
+
+    g = list(map(int, input().split()))
+    s = list(map(int, input().split()))
+
+    print(maxContentChildren(g, s))
+```
+
+---
+
+## Complexity
+
+Sorting dominates the running time.
+
+* **Time:** `O(n log n + m log m)`
+* **Space:** `O(1)` extra space apart from the sorting implementation.
+
+---
+
+## Key Idea
+
+> Sort both children and cookies, then use the smallest cookie that can satisfy each child.
+
+This greedy strategy maximizes the number of children who receive a suitable cookie.
