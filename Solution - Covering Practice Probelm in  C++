@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int N; // Number of intervals
+    cin >> N;
+    
+    vector<pair<int, int>> intervals(N); // Array to store intervals
+
+    // Input intervals
+    for (auto &interval : intervals) {
+        cin >> interval.first >> interval.second; // Read start and end of each interval
+    }
+
+    // Sort intervals based on the end value (second element)
+    sort(intervals.begin(), intervals.end(), [](auto &left, auto &right) {
+        return left.second < right.second;
+    });
+
+    int lastEnd = -1; // Track the end of the last interval added
+    int count = 0; // Counter for the number of non-overlapping intervals
+
+    // Iterate through sorted intervals
+    for (auto interval : intervals) {
+        // If the start of the current interval is less than or equal to the last end, skip it
+        if (interval.first <= lastEnd) {
+            continue;
+        } else { // If it does not overlap
+            lastEnd = interval.second; // Update lastEnd to current interval's end
+            count++; // Increment the count of non-overlapping intervals
+        }
+    }
+    
+    cout << count << endl; // Output the result
+
+    return 0;
+}
