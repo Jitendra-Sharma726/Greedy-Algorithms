@@ -1,0 +1,315 @@
+# Snakes, Mongooses and the Ultimate Election
+
+## Problem Statement
+
+You are given a string containing only:
+
+* `s` — represents a snake
+* `m` — represents a mongoose
+
+The animals are arranged in a row.
+
+Before an election, each mongoose can eat **at most one neighboring snake**.
+
+A neighboring animal means the animal immediately to the left or right.
+
+The mongooses want to maximize the number of snakes they eat.
+
+After all possible eating is done:
+
+* Each remaining snake votes for **snakes**.
+* Each remaining mongoose votes for **mongooses**.
+
+Determine the winner.
+
+Possible results:
+
+* `snakes`
+* `mongooses`
+* `tie`
+
+---
+
+## Important Rules
+
+A mongoose can eat:
+
+* The snake immediately to its left, or
+* The snake immediately to its right.
+
+But a mongoose can eat **at most one snake**.
+
+A snake can be eaten by a mongoose only once.
+
+The goal is to maximize the total number of snakes eaten.
+
+---
+
+## Input Format
+
+The first line contains an integer `T`, the number of test cases.
+
+For each test case:
+
+* The next line contains a string consisting only of `s` and `m`.
+
+---
+
+## Output Format
+
+For each test case, print:
+
+* `snakes` if snakes have more votes.
+* `mongooses` if mongooses have more votes.
+* `tie` if both have the same number of votes.
+
+---
+
+## Constraints
+
+* `1 ≤ T ≤ 100`
+* `1 ≤ |s| ≤ 100`
+
+---
+
+## Sample Input
+
+```text
+4
+sm
+ssm
+sms
+ssmmmssss
+```
+
+## Sample Output
+
+```text
+mongooses
+tie
+tie
+snakes
+```
+
+---
+
+## Explanation
+
+### Test Case 1
+
+```text
+sm
+```
+
+The mongoose can eat the snake:
+
+```text
+sm → m
+```
+
+Remaining:
+
+```text
+Snakes = 0
+Mongooses = 1
+```
+
+Therefore:
+
+```text
+mongooses
+```
+
+---
+
+### Test Case 2
+
+```text
+ssm
+```
+
+The mongoose can eat the snake immediately to its left:
+
+```text
+ssm → sm
+```
+
+Remaining:
+
+```text
+Snakes = 1
+Mongooses = 1
+```
+
+Therefore:
+
+```text
+tie
+```
+
+---
+
+### Test Case 3
+
+```text
+sms
+```
+
+The mongoose has two neighboring snakes, but it can eat only one:
+
+```text
+sms → sm
+```
+
+or
+
+```text
+sms → ms
+```
+
+In either case:
+
+```text
+Snakes = 1
+Mongooses = 1
+```
+
+Therefore:
+
+```text
+tie
+```
+
+---
+
+### Test Case 4
+
+```text
+ssmmmssss
+```
+
+The three mongooses can eat at most three snakes, but because of their positions, only two snakes can be eaten optimally.
+
+After eating:
+
+```text
+Snakes = 4
+Mongooses = 3
+```
+
+Therefore:
+
+```text
+snakes
+```
+
+---
+
+# Greedy Approach
+
+The key observation is that every mongoose can eat at most one snake.
+
+We scan the string from left to right and determine which snakes can be eaten.
+
+Whenever we see a mongoose:
+
+1. If there is an uneaten snake immediately to the left, the mongoose can eat it.
+2. Otherwise, if there is a snake immediately to the right, the mongoose can eat it.
+3. Otherwise, it cannot eat anything.
+
+A convenient way is to directly count the number of snakes eaten.
+
+### Why Left First?
+
+If a mongoose can eat a snake on its left, eating that snake immediately is safe because that snake cannot be eaten by another mongoose later.
+
+If there is no snake on the left, we check the right.
+
+---
+
+## Algorithm
+
+For each test case:
+
+1. Convert the string into a list.
+2. Traverse the string from left to right.
+3. When a mongoose `m` is found:
+
+   * If the previous position contains an uneaten snake, remove it.
+   * Otherwise, if the next position contains a snake, remove it.
+4. Count the remaining snakes and mongooses.
+5. Compare their counts.
+
+---
+
+## Python Solution
+
+```python
+def find_winner(s):
+    animals = list(s)
+
+    n = len(animals)
+
+    for i in range(n):
+        if animals[i] != 'm':
+            continue
+
+        # Try to eat the snake on the left
+        if i > 0 and animals[i - 1] == 's':
+            animals[i - 1] = 'x'
+
+        # Otherwise, try to eat the snake on the right
+        elif i + 1 < n and animals[i + 1] == 's':
+            animals[i + 1] = 'x'
+
+    snakes = animals.count('s')
+    mongooses = animals.count('m')
+
+    if snakes > mongooses:
+        return "snakes"
+    elif mongooses > snakes:
+        return "mongooses"
+    else:
+        return "tie"
+
+
+# Input
+T = int(input())
+
+for _ in range(T):
+    s = input().strip()
+    print(find_winner(s))
+```
+
+---
+
+## Complexity
+
+Let `N` be the length of the string.
+
+* Time Complexity: **`O(N)`**
+* Space Complexity: **`O(N)`**
+
+The algorithm scans the string only once.
+
+---
+
+## Key Takeaway
+
+This is a simple **Greedy Algorithm** problem.
+
+> Each mongoose should eat a neighboring snake whenever possible, while ensuring that each mongoose eats at most one snake.
+
+After maximizing the number of eaten snakes, simply compare:
+
+```text
+remaining snakes
+```
+
+with:
+
+```text
+remaining mongooses
+```
+
+to determine the winner.
