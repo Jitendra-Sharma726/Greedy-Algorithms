@@ -1,0 +1,21 @@
+class Solution {
+public:
+    int findMinimumRemovals(vector<vector<int>>& intervalList) {
+        if (intervalList.empty()) return 0;
+
+        // Sort intervals by end time
+        sort(intervalList.begin(), intervalList.end(), [](const vector<int>& a, const vector<int>& b) {
+            return a[1] < b[1];
+        });
+
+        int count = 0;
+        int end = intervalList[0][1];
+
+        for (int i = 1; i < (int)intervalList.size(); i++) {
+            if (intervalList[i][0] < end) count++;
+            else end = intervalList[i][1];
+        }
+
+        return count;
+    }
+};
