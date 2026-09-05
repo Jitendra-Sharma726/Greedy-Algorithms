@@ -1,0 +1,196 @@
+# Chef and String
+
+## Problem Statement
+
+There are `N` students standing in a row.
+
+Each student is represented by one character in a string `S`:
+
+* `x` → Girl
+* `y` → Boy
+
+Students standing next to each other are friends.
+
+The students need to form pairs for a dance competition. Each pair must contain **one boy and one girl**.
+
+### Rules
+
+* Only adjacent students can form a pair.
+* Each student can be part of at most one pair.
+* A pair must contain one `x` and one `y`.
+
+Find the **maximum number of pairs** that can be formed.
+
+---
+
+## Input Format
+
+The first line contains an integer `T`, the number of test cases.
+
+For each test case:
+
+* The next line contains a string `S`.
+
+---
+
+## Output Format
+
+For each test case, print the maximum number of valid pairs.
+
+---
+
+## Constraints
+
+* `1 ≤ T ≤ 100`
+* `1 ≤ |S| ≤ 10⁵`
+* `S` contains only `x` and `y`
+* The total length of all strings is at most `3 × 10⁵`
+
+---
+
+## Example
+
+### Input
+
+```text
+3
+xy
+xyxxy
+yy
+```
+
+### Output
+
+```text
+1
+2
+0
+```
+
+---
+
+## Explanation
+
+### Test Case 1
+
+```text
+S = "xy"
+```
+
+The two students are different and adjacent:
+
+```text
+x y → 1 pair
+```
+
+Answer:
+
+```text
+1
+```
+
+### Test Case 2
+
+```text
+S = "xyxxy"
+```
+
+We can form:
+
+```text
+xy x xy
+```
+
+Two valid pairs can be formed.
+
+Answer:
+
+```text
+2
+```
+
+### Test Case 3
+
+```text
+S = "yy"
+```
+
+Both students are boys, so no valid pair can be formed.
+
+Answer:
+
+```text
+0
+```
+
+---
+
+## Greedy Approach
+
+Traverse the string from left to right.
+
+Whenever two consecutive characters are different:
+
+```text
+xy
+```
+
+or
+
+```text
+yx
+```
+
+we can form a pair.
+
+After forming a pair, skip both students because each student can participate in only one pair.
+
+### Algorithm
+
+1. Start from the first student.
+2. Check the current student and the next student.
+3. If they are different, form a pair and increase the answer.
+4. Skip both students.
+5. Otherwise, move to the next student.
+6. Continue until the end of the string.
+
+---
+
+## Python Solution
+
+```python
+def maxPairs(s):
+    count = 0
+    i = 0
+
+    while i < len(s) - 1:
+        if s[i] != s[i + 1]:
+            count += 1
+            i += 2
+        else:
+            i += 1
+
+    return count
+
+
+T = int(input())
+
+for _ in range(T):
+    s = input().strip()
+    print(maxPairs(s))
+```
+
+---
+
+## Complexity
+
+* **Time:** `O(N)` per test case
+* **Space:** `O(1)`
+
+---
+
+## Key Idea
+
+> Whenever two adjacent students are different, pair them immediately and move ahead by two positions.
+
+This greedy strategy is optimal because choosing an available valid pair as early as possible cannot reduce the number of pairs that can be formed later.
