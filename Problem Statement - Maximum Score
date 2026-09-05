@@ -1,0 +1,293 @@
+# Maximum Score
+
+## Problem Statement
+
+You are given `N` sequences (rows), and each sequence contains exactly `N` integers.
+
+You must choose **exactly one element from each row**.
+
+Let the chosen elements be:
+
+```text
+E1, E2, ..., EN
+```
+
+The chosen elements must satisfy:
+
+```text
+E1 < E2 < E3 < ... < EN
+```
+
+Your goal is to **maximize the sum**:
+
+```text
+E1 + E2 + ... + EN
+```
+
+If it is impossible to choose elements satisfying the strictly increasing condition, return:
+
+```text
+-1
+```
+
+---
+
+## Example
+
+Consider:
+
+```text
+1 2 3
+4 5 6
+7 8 9
+```
+
+We need:
+
+```text
+E1 < E2 < E3
+```
+
+To maximize the sum, choose:
+
+```text
+E1 = 3
+E2 = 6
+E3 = 9
+```
+
+Therefore:
+
+```text
+3 + 6 + 9 = 18
+```
+
+Answer:
+
+```text
+18
+```
+
+---
+
+## Input Format
+
+The first line contains an integer `T`, the number of test cases.
+
+For each test case:
+
+* The first line contains an integer `N`.
+* The next `N` lines contain `N` integers representing the sequences.
+
+---
+
+## Output Format
+
+For each test case:
+
+* Print the maximum possible sum if a valid selection exists.
+* Print `-1` if no strictly increasing selection is possible.
+
+---
+
+## Constraints
+
+* `1 ≤ T ≤ 10`
+* `1 ≤ N ≤ 700`
+* Sum of `N` across all test cases ≤ `3700`
+* `1 ≤ A[i][j] ≤ 10⁹`
+
+---
+
+## Sample Input
+
+```text
+1
+3
+1 2 3
+4 5 6
+7 8 9
+```
+
+## Sample Output
+
+```text
+18
+```
+
+---
+
+# Greedy Approach
+
+The key observation is that we want the **largest possible value from each row**, but every chosen value must be strictly greater than the value chosen from the previous row.
+
+A simple greedy strategy is to process the rows **from bottom to top**.
+
+For the last row:
+
+> Choose the largest element available.
+
+For every previous row:
+
+> Choose the largest element that is **strictly smaller** than the value chosen from the next row.
+
+This works because choosing the largest valid value for the current row gives us the maximum possible contribution while still leaving enough room for the rows before it.
+
+---
+
+## Example
+
+Given:
+
+```text
+1 2 3
+4 5 6
+7 8 9
+```
+
+Start from the last row:
+
+```text
+Row 3 → choose 9
+```
+
+Now row 2 must contain a value `< 9`:
+
+```text
+Row 2 → choose 6
+```
+
+Now row 1 must contain a value `< 6`:
+
+```text
+Row 1 → choose 3
+```
+
+So:
+
+```text
+3 < 6 < 9
+```
+
+and:
+
+```text
+3 + 6 + 9 = 18
+```
+
+---
+
+# Algorithm
+
+For each test case:
+
+1. Start with the last row.
+2. Choose the largest element from that row.
+3. Move to the previous row.
+4. Find the largest element that is strictly smaller than the previously selected value.
+5. Add it to the answer.
+6. If no valid element exists, return `-1`.
+7. Continue until all rows are processed.
+
+Since the elements in each row are not necessarily sorted, sort each row first.
+
+---
+
+# Python Solution
+
+```python
+def maximum_score(matrix):
+    n = len(matrix)
+
+    # Sort every row
+    for row in matrix:
+        row.sort()
+
+    # Start with the largest element in the last row
+    current = matrix[n - 1][-1]
+    total = current
+
+    # Process rows from bottom to top
+    for i in range(n - 2, -1, -1):
+
+        # Find the largest element strictly smaller than current
+        left = 0
+        right = n - 1
+        best = -1
+
+        while left <= right:
+            mid = (left + right) // 2
+
+            if matrix[i][mid] < current:
+                best = matrix[i][mid]
+                left = mid + 1
+            else:
+                right = mid - 1
+
+        # No valid element found
+        if best == -1:
+            return -1
+
+        current = best
+        total += current
+
+    return total
+
+
+# Input
+T = int(input())
+
+for _ in range(T):
+    N = int(input())
+
+    matrix = []
+
+    for _ in range(N):
+        row = list(map(int, input().split()))
+        matrix.append(row)
+
+    print(maximum_score(matrix))
+```
+
+---
+
+# Complexity
+
+For each row:
+
+* Sorting takes `O(N log N)`
+* Binary search takes `O(log N)`
+
+For `N` rows:
+
+```text
+Time Complexity: O(N² log N)
+```
+
+Space complexity:
+
+```text
+Space Complexity: O(N²)
+```
+
+for storing the matrix.
+
+---
+
+# Key Takeaway
+
+The main greedy idea is:
+
+> **Start from the last row and always choose the largest value that is strictly smaller than the value already chosen for the next row.**
+
+Processing from **right to left (bottom to top)** makes sure every choice is as large as possible while maintaining:
+
+```text
+E1 < E2 < ... < EN
+```
+
+If at any row no valid smaller value exists, the answer is:
+
+```text
+-1
+```
